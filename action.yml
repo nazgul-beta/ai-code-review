@@ -1,0 +1,41 @@
+name: "AI Code Reviewer"
+description: "This GitHub Action automatically reviews PRs using OpenAI's AI model."
+author: 'nazgul-beta'
+
+inputs:
+  GITHUB_TOKEN:
+    description: 'GitHub token to interact with the repository'
+    required: true
+  OPENAI_API_KEY:
+    description: 'OPENAI API key'
+    required: true
+  OPENAI_MODEL:
+    description: 'The OPENAI model to use for code review'
+    required: false
+    default: 'gpt-4o-mini'
+  INPUT_EXCLUDE:
+    description: 'Comma-separated list of file patterns to exclude'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install PyGithub unidiff openai
+
+    - name: Run AI code reviewer
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ inputs.OPENAI_API_KEY }}
+        INPUT_EXCLUDE: ${{ inputs.EXCLUDE }}
+      run: python ${{ github.action_path }}/review_code_openAI.py
