@@ -10,7 +10,7 @@ from unidiff import Hunk, PatchedFile, PatchSet
 
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 
-# Initialize GitHub and Gemini clients
+# Initialize GitHub and AI clients
 gh = Github(GITHUB_TOKEN)
 openAI_client = OpenAI()
 
@@ -78,7 +78,7 @@ def get_diff(owner: str, repo: str, pull_number: int) -> str:
 
 
 def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> List[Dict[str, Any]]:
-    """Analyzes the code changes using Gemini and generates review comments."""
+    """Analyzes the code changes using AI and generates review comments."""
     print("Starting analyze_code...")
     print(f"Number of files to analyze: {len(parsed_diff)}")
     comments = []
@@ -116,7 +116,7 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
             hunk.content = '\n'.join(hunk_lines)
             
             prompt = create_prompt(file_info, hunk, pr_details)
-            print("Sending prompt to OpenAI...")
+            print("Sending prompt to AI...")
             ai_response = get_ai_response(prompt)
             print(f"AI response received: {ai_response}")
             
@@ -132,7 +132,7 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
 
 
 def create_prompt(file: PatchedFile, hunk: Hunk, pr_details: PRDetails) -> str:
-    """Creates the prompt for the Gemini model."""
+    """Creates the prompt for the AI model."""
     return f"""Your task is reviewing pull requests. Instructions:
     - Provide the response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
     - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
@@ -157,13 +157,11 @@ Git diff to review:
 """
 
 def get_ai_response(prompt: str) -> List[Dict[str, str]]:
-    """Sends the prompt to OpenAI API and retrieves the response."""
-    # Use 'gemini-1.5-flash-002' as a fallback default value if the environment variable isn't set
-    #gemini_model = Client.GenerativeModel(os.environ.get('GEMINI_MODEL', 'gemini-1.5-flash-002'))
-    print("===== The promt sent to OpenAI is: =====")
+    """Sends the prompt to AI API and retrieves the response."""
+    # Use openAI gpt-4o-mini model
+    print("===== The promt sent to AI is: =====")
     print(prompt)
     try:
-        #response = gemini_model.generate_content(prompt)
         response = openAI_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -209,7 +207,7 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             print(f"Raw response: {response_text}")
             return []
     except Exception as e:
-        print(f"Error during OpenAI API call: {e}")
+        print(f"Error during AI API call: {e}")
         return []
 
 class FileInfo:
@@ -261,7 +259,7 @@ def create_review_comment(
     try:
         # Create the review with only the required fields
         review = pr.create_review(
-            body="Gemini AI Code Reviewer Comments",
+            body="AI Code Reviewer Comments",
             comments=comments,
             event="COMMENT"
         )
