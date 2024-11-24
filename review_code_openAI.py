@@ -176,7 +176,9 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
         )
 
         #response_text = response.text.strip()
-        response_text = response.choices[0].message.content.text.strip()
+        print("ai raw response:")
+        print(response.choices[0].message.content)
+        response_text = response.choices[0].message.content
         if response_text.startswith('```json'):
             response_text = response_text[7:]  # Remove ```json
         if response_text.endswith('```'):
