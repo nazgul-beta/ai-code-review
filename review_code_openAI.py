@@ -116,7 +116,7 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
             hunk.content = '\n'.join(hunk_lines)
             
             prompt = create_prompt(file_info, hunk, pr_details)
-            print("Sending prompt to Gemini...")
+            print("Sending prompt to OpenAI...")
             ai_response = get_ai_response(prompt)
             print(f"AI response received: {ai_response}")
             
@@ -175,7 +175,8 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             ]
         )
 
-        response_text = response.text.strip()
+        #response_text = response.text.strip()
+        response_text = response.choices[0].message.content.text.strip()
         if response_text.startswith('```json'):
             response_text = response_text[7:]  # Remove ```json
         if response_text.endswith('```'):
@@ -206,7 +207,7 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             print(f"Raw response: {response_text}")
             return []
     except Exception as e:
-        print(f"Error during Gemini API call: {e}")
+        print(f"Error during OpenAI API call: {e}")
         return []
 
 class FileInfo:
