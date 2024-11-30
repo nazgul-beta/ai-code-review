@@ -193,9 +193,8 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             valid_summary_reviews_fixes = []
             # summary of the PR
             if "summary" in data and isinstance(data["summary"], list):
-                summary = data["summary"]
-                if "summary" in summary:
-                        valid_summary_reviews_fixes.append(summary)                
+                summary = data["summary"]                
+                valid_summary_reviews_fixes.append(summary)                
             else:
                 print("Error: Response doesn't contain valid 'summary'")
                 print(f"Response content: {data}")                
@@ -215,13 +214,9 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             
             # code fixes
             if "fixes" in data and isinstance(data["fixes"], list):
-                fixes = data["fixes"]
-                
+                fixes = data["fixes"]                
                 for fix in fixes:
-                    if "lineNumber" in fix and "reviewComment" in fix:
-                        valid_summary_reviews_fixes.append(fix)
-                    else:
-                        print(f"Invalid fix format: {fix}")                
+                    valid_summary_reviews_fixes.append(fix)               
             else:
                 print("Error: Response doesn't contain valid 'fixes' array")
                 print(f"Response content: {data}") 
