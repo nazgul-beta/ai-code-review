@@ -133,11 +133,13 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
 
 def create_prompt(file: PatchedFile, hunk: Hunk, pr_details: PRDetails) -> str:
     """Creates the prompt for the AI model."""
-    return f"""Your task is reviewing pull requests. Instructions:
+    return f"""Your task is summarizing & reviewing pull requests. Instructions:
     - Provide the response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
     - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
     - Use GitHub Markdown in comments
-    - Focus on bugs, security issues, and performance problems
+    - First summarize the code changes done in the PR concisely
+    - Next, provide suggestions, focus on bugs, security issues, and performance problems
+    - If you find any code issues or bugs, provide fix for those, if there are multiple issues provide fix seperately for all
     - IMPORTANT: NEVER suggest adding comments to the code
 
 Review the following code diff in the file "{file.path}" and take the pull request title and description into account when writing the response.
