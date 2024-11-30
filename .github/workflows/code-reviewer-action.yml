@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/stealth-code-review')
+      contains(github.event.comment.body, '/ai-code-review')
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3

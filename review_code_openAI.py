@@ -82,8 +82,7 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
     print("Starting analyze_code...")
     print(f"Number of files to analyze: {len(parsed_diff)}")
     comments = []
-    #print(f"Initial comments list: {comments}")
-    
+        
     for file_data in parsed_diff:
         file_path = file_data.get('path', '')
         print(f"\nProcessing file: {file_path}")
@@ -133,15 +132,16 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
 
 def create_prompt(file: PatchedFile, hunk: Hunk, pr_details: PRDetails) -> str:
     """Creates the prompt for the AI model."""
-    return f"""Your task is summarizing & reviewing pull requests. Instructions:
-    - Provide the response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
-    - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
-    - Use GitHub Markdown in comments
+    return f"""Your task is to summarize & review pull requests as per instructions below:
     - First summarize the code changes done in the PR concisely
     - Next, provide suggestions, focus on bugs, security issues, and performance problems
     - If you find any code issues or bugs, provide fix for those, if there are multiple issues provide fix seperately for all
-    - IMPORTANT: NEVER suggest adding comments to the code
-
+    - Provide the response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
+    - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
+    - Use GitHub Markdown in comments
+    - Don't suggest adding comments to the code
+    - Provide the whole response in organized way, summary at the top followed by code review suggestions & then fixes
+    
 Review the following code diff in the file "{file.path}" and take the pull request title and description into account when writing the response.
   
 Pull request title: {pr_details.title}
@@ -159,7 +159,7 @@ Git diff to review:
 """
 
 def get_ai_response(prompt: str) -> List[Dict[str, str]]:
-    """Sends the prompt to AI API and retrieves the response."""
+    """Sends the prompt to OpenAI API and retrieves the response."""
     # Use openAI gpt-4o-mini model
     print("===== The promt sent to AI is: =====")
     print(prompt)
@@ -176,8 +176,8 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
         )
 
         #response_text = response.text.strip()
-        print("ai raw response:")
-        print(response.choices[0].message.content)
+        #print("ai raw response:")
+        #print(response.choices[0].message.content)
         response_text = response.choices[0].message.content
         if response_text.startswith('```json'):
             response_text = response_text[7:]  # Remove ```json
@@ -209,7 +209,7 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             print(f"Raw response: {response_text}")
             return []
     except Exception as e:
-        print(f"Error during AI API call: {e}")
+        print(f"Error during OpenAI API call: {e}")
         return []
 
 class FileInfo:
