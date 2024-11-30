@@ -136,7 +136,9 @@ def create_prompt(file: PatchedFile, hunk: Hunk, pr_details: PRDetails) -> str:
     - First summarize the code changes done in the PR concisely
     - Next, provide suggestions, focus on bugs, security issues, and performance problems
     - If you find any code issues or bugs, provide fix for those, if there are multiple issues provide fix seperately for all
-    - Provide the response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
+    - Provide PR summary in following JSON format: {{"summary": [<summary>]}}
+    - Provide the code review response in following JSON format:  {{"reviews": [{{"lineNumber":  <line_number>, "reviewComment": "<review comment>"}}]}}
+    - Provide the code fixes response in following JSON format:  {{"fixes": [{{"lineNumber":  <line_number>, "fixedcode": "<fixed code>"}}]}}
     - Provide comments and suggestions ONLY if there is something to improve, otherwise "reviews" should be an empty array.
     - Use GitHub Markdown in comments
     - Don't suggest adding comments to the code
@@ -193,8 +195,9 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             valid_summary_reviews_fixes = []
             # summary of the PR
             if "summary" in data and isinstance(data["summary"], list):
-                summary = data["summary"]                
-                valid_summary_reviews_fixes.append(summary)                
+                summary = data["summary"] 
+                for summary in summary:               
+                    valid_summary_reviews_fixes.append(summary)                
             else:
                 print("Error: Response doesn't contain valid 'summary'")
                 print(f"Response content: {data}")                
@@ -216,7 +219,8 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
             if "fixes" in data and isinstance(data["fixes"], list):
                 fixes = data["fixes"]                
                 for fix in fixes:
-                    valid_summary_reviews_fixes.append(fix)               
+                    if "lineNumber" in fix and "fixedcode" in fix:
+                        valid_summary_reviews_fixes.append(fix)               
             else:
                 print("Error: Response doesn't contain valid 'fixes' array")
                 print(f"Response content: {data}") 
