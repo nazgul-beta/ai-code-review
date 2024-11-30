@@ -132,7 +132,7 @@ def analyze_code(parsed_diff: List[Dict[str, Any]], pr_details: PRDetails) -> Li
 
 def create_prompt(file: PatchedFile, hunk: Hunk, pr_details: PRDetails) -> str:
     """Creates the prompt for the AI model."""
-    return f"""Your task is to summarize & review pull requests as per instructions below:
+    return f"""Your task is to summarize, review pull requests & provide fixes as per instructions below:
     - First summarize the code changes done in the PR concisely
     - Next, provide suggestions, focus on bugs, security issues, and performance problems
     - If you find any code issues or bugs, provide fix for those, if there are multiple issues provide fix seperately for all
@@ -190,20 +190,47 @@ def get_ai_response(prompt: str) -> List[Dict[str, str]]:
         try:
             data = json.loads(response_text)
             print(f"Parsed JSON data: {data}")
-            
+            valid_summary_reviews_fixes = []
+            # summary of the PR
+            if "summary" in data and isinstance(data["summary"], list):
+                summary = data["summary"]
+                if "summary" in summary:
+                        valid_summary_reviews_fixes.append(summary)                
+            else:
+                print("Error: Response doesn't contain valid 'summary'")
+                print(f"Response content: {data}")                
+
+            # code reviews suggestions
             if "reviews" in data and isinstance(data["reviews"], list):
                 reviews = data["reviews"]
-                valid_reviews = []
+                
                 for review in reviews:
                     if "lineNumber" in review and "reviewComment" in review:
-                        valid_reviews.append(review)
+                        valid_summary_reviews_fixes.append(review)
                     else:
-                        print(f"Invalid review format: {review}")
-                return valid_reviews
+                        print(f"Invalid review format: {review}")                
             else:
                 print("Error: Response doesn't contain valid 'reviews' array")
-                print(f"Response content: {data}")
+                print(f"Response content: {data}")                
+            
+            # code fixes
+            if "fixes" in data and isinstance(data["fixes"], list):
+                fixes = data["fixes"]
+                
+                for fix in fixes:
+                    if "lineNumber" in fix and "reviewComment" in fix:
+                        valid_summary_reviews_fixes.append(fix)
+                    else:
+                        print(f"Invalid fix format: {fix}")                
+            else:
+                print("Error: Response doesn't contain valid 'fixes' array")
+                print(f"Response content: {data}") 
+
+            if not valid_summary_reviews_fixes:
                 return []
+            else:
+                return valid_summary_reviews_fixes
+                  
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON response: {e}")
             print(f"Raw response: {response_text}")
