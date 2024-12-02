@@ -361,14 +361,14 @@ def main():
             if not any(fnmatch.fnmatch(file.get('path', ''), pattern) for pattern in exclude_patterns)
         ]
 
-        comments = analyze_code(filtered_diff, pr_details)
-        if comments:
-            try:
-                create_review_comment(
-                    pr_details.owner, pr_details.repo, pr_details.pull_number, comments
-                )
-            except Exception as e:
-                print("Error in create_review_comment:", e)
+        # comments = analyze_code(filtered_diff, pr_details)
+        # if comments:
+        #     try:
+        #         create_review_comment(
+        #             pr_details.owner, pr_details.repo, pr_details.pull_number, comments
+        #         )
+        #     except Exception as e:
+        #         print("Error in create_review_comment:", e)
     else:
         print("Unsupported event:", os.environ.get("GITHUB_EVENT_NAME"))
         return
