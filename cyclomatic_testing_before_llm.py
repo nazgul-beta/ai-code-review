@@ -1,3 +1,10 @@
+
+#This is a pre-processing step in which the code is scanned for high risk changes
+#and the cyclomatic complexity of the code is calculated
+#The output of this step is a list of dictionaries containing the file path, complexity score and high risk flag
+#The list is then sorted based on the high risk flag and complexity score
+# THIS OUTPUT IS THE INPUT FOR THE LLM
+
 from radon.complexity import cc_visit
 
 def calculate_cyclomatic_complexity(file_content):
