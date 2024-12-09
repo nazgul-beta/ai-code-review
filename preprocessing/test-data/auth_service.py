@@ -13,6 +13,10 @@ def hash_password(password):
 
 def authenticate_user(username, password):
     # High cyclomatic complexity with nested conditions
+    """ 
+    Authenticates a user based on their username and password.
+
+    """
     if username == "admin":
         if password == "password123":  # Hardcoded credentials - highly risky
             return "Admin authenticated"
